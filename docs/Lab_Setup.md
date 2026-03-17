@@ -125,32 +125,98 @@ Navigate to **Applications → Server Groups** → **Add Server Group**.
 Enabling **Dynamic Discovery** is what powers the App Discovery demo — ZPA
 App Discovery will scan and surface additional ports/services automatically.
 
-### 2.4 Create an Access Policy
+### 2.4 Create Access Policies
 
 Navigate to **Policy → Access Policy** → **Add Rule**.
 
-#### Rule 1 – Allow Lab Users Full Access
+Create the rules below **in order** (lower priority number = higher precedence).
+ZPA evaluates rules top-to-bottom and stops at the first match.
+
+#### Rule 1 – IT Admin Full Access
 
 | Field | Value |
 |-------|-------|
-| Rule Name | `Allow-Lab-Users-WebRDP-SMB` |
+| Rule Name | `Allow-IT-Admins-Full` |
+| Priority | 1 |
 | Action | Allow |
-| Conditions | SAML Attribute **department** = `Lab` (or your IdP attribute) |
+| Conditions | SAML Attribute **department** = `IT` |
 | Application | `Lab-WebApps`, `Lab-RDP`, `Lab-FileShare`, `Lab-SSH` |
 
-> **Do NOT** add `Lab-Shadow-App` — this intentional gap is what the
-> policy-block demo demonstrates.
-
-#### Rule 2 – Block All Other Private Apps (optional but recommended)
+#### Rule 2 – Engineers (Web + SSH only)
 
 | Field | Value |
 |-------|-------|
-| Rule Name | `Block-Unentitled-Apps` |
+| Rule Name | `Allow-Engineers-WebSSH` |
+| Priority | 2 |
+| Action | Allow |
+| Conditions | SAML Attribute **department** = `Engineering` |
+| Application | `Lab-WebApps`, `Lab-SSH` |
+
+> Engineers get web and SSH access but **not** RDP or SMB file shares.
+> This difference is key to the per-user demo in Act 1.5.
+
+#### Rule 3 – Contractors (Web Only)
+
+| Field | Value |
+|-------|-------|
+| Rule Name | `Allow-Contractors-WebOnly` |
+| Priority | 3 |
+| Action | Allow |
+| Conditions | SAML Attribute **department** = `Contractor` |
+| Application | `Lab-WebApps` |
+
+> Contractors are limited to the web portal only — no RDP, SSH, or file shares.
+
+#### Rule 4 – Block Shadow App (explicit block for all users)
+
+| Field | Value |
+|-------|-------|
+| Rule Name | `Block-Shadow-App` |
+| Priority | 4 |
 | Action | Block |
 | Conditions | Any user |
 | Application | `Lab-Shadow-App` |
 
-### 2.5 Enrol the ZPA Client on Windows 11
+> No user — regardless of department — may reach port 9090. This explicit
+> block rule fires even if a user somehow matches a broader future allow rule.
+
+> **Tip:** HR users (department = `HR`) match **none** of the allow rules
+> above, so they are implicitly denied all private-app access. This "implicit
+> deny" is as important to show as the explicit block.
+
+---
+
+### 2.5 Demo User Personas
+
+Create the following user accounts in your IdP (Azure AD, Okta, Ping, etc.)
+and assign the SAML **department** attribute accordingly. These four personas
+power the full multi-user demo in Act 1.5 of the ZPA Demo Guide.
+
+| Persona | Suggested Username | IdP Department | Access |
+|---------|--------------------|----------------|--------|
+| IT Admin | `bob.jones` | `IT` | WebApps + RDP + FileShare + SSH (full) |
+| Engineer | `alice.smith` | `Engineering` | WebApps + SSH only |
+| Contractor | `carol.white` | `Contractor` | WebApps only |
+| HR Analyst | `dave.hr` | `HR` | **No access** (implicit deny) |
+
+> You only need **two** of these accounts to tell a compelling story.
+> The IT Admin + Contractor pair shows the biggest contrast and is the
+> easiest to set up.
+
+#### Quick IdP Setup (Azure AD example)
+
+1. Create users `alice.smith`, `bob.jones`, `carol.white`, and `dave.hr` in
+   Azure AD.
+2. In the ZPA SAML IdP configuration, map the Azure AD **Department** field to
+   a SAML attribute named `department`.
+3. Set each user's **Department** field in their Azure AD profile to match the
+   table above.
+4. Log each user into a separate Windows session (or use a single machine with
+   `Run as different user`) to demonstrate the access differences.
+
+---
+
+### 2.6 Enrol the ZPA Client on Windows 11
 
 1. Download **ZPA Client Connector** from the ZPA Portal →
    **Administration → Client Connector**.
@@ -207,6 +273,11 @@ Before running the demo, verify:
 - [ ] From Windows 11, browsing to `http://192.168.1.20` works **only when the
       ZPA client is connected** (disconnect the client and try again to confirm
       direct access is blocked by your network posture/firewall).
+- [ ] All four access policy rules are created and in the correct priority order.
+- [ ] Logged in as `bob.jones` (IT): RDP to `192.168.1.20:3389` **succeeds**.
+- [ ] Logged in as `carol.white` (Contractor): RDP to `192.168.1.20:3389` is **blocked**.
+- [ ] Logged in as `dave.hr` (HR): HTTP to `http://192.168.1.20` is **blocked**.
+- [ ] Shadow app on port 9090 is **blocked** for all users.
 
 ---
 
@@ -218,3 +289,6 @@ Before running the demo, verify:
 | App Segment not reachable | Confirm the connector and app server are on the same subnet; check Windows Firewall on the server. |
 | ZPA Client not connecting | Verify IdP metadata is correct in ZPA tenant; check machine DNS can reach `*.zscaler.net`. |
 | Policy block not firing | Ensure `Lab-Shadow-App` has **no** matching allow rule. Check *Policy Simulation* in the portal. |
+| Contractor can reach RDP | Verify `Allow-Contractors-WebOnly` rule does NOT include `Lab-RDP`. Check rule priority order. |
+| HR user can reach any app | Verify there is **no** allow rule with department = `HR`. The implicit-deny should block all access. |
+| Wrong user persona sees wrong access | Use *Policy Simulation* (Portal → Policy → Simulate) to test each persona against each app segment. |
