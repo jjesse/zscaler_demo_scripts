@@ -8,28 +8,31 @@ repository so you never lose your place.
 
 ## Overview
 
-This demo tells a single story in four acts:
+This demo tells a single story in five acts:
 
 | Act | Story Beat | Key ZPA Capability |
 |-----|-----------|-------------------|
 | 1 | "User connects to private apps – no VPN" | Zero-Trust app access |
+| 1.5 | "Different users see different apps" | Granular per-user policy |
 | 2 | "IT doesn't know about all its apps" | App Discovery |
-| 3 | "Block a user from apps they shouldn't reach" | Granular access policy |
+| 3 | "Block a user from apps they shouldn't reach" | Policy enforcement + access denied |
 | 4 | "Admin gets full visibility" | Log Explorer / Analytics |
 
-Total run time: **20–30 minutes** (adjustable by skipping acts).
+Total run time: **25–35 minutes** (adjustable by skipping acts).
 
 ---
 
 ## Pre-Demo Checklist
 
 - [ ] ZPA Admin Portal open in a browser tab (split screen or second monitor).
-- [ ] Windows 11 machine logged in; ZPA Client **Connected** (green tray icon).
+- [ ] Windows 11 machine logged in as **bob.jones** (IT Admin); ZPA Client **Connected** (green tray icon).
+- [ ] A second Windows session (or browser profile) ready for **carol.white** (Contractor) persona.
 - [ ] Windows Server IIS accessible at `http://192.168.1.20` (confirm before customer joins).
 - [ ] Ubuntu Server terminal open (to run traffic scripts).
 - [ ] Traffic generator script ready to paste:
       `scripts/linux/generate_zpa_traffic.sh`
-- [ ] Have a second Windows/browser session **without** ZPA client to show "what it looks like without ZPA".
+- [ ] Have a session **without** ZPA client to show "what it looks like without ZPA".
+- [ ] Four access policy rules configured (see Lab_Setup.md §2.4).
 
 ---
 
@@ -90,6 +93,89 @@ Total run time: **20–30 minutes** (adjustable by skipping acts).
 
 ---
 
+## Act 1.5 – Granular Per-User Access Control (8 min)
+
+### Talking Points
+
+> "ZPA doesn't just control whether you can access the network — it controls
+> which specific applications each individual user can reach, based on their
+> identity. Let me show you what that looks like with three real personas."
+
+### Setup
+
+You need two active ZPA Client sessions: one as **bob.jones** (IT Admin) and
+one as **carol.white** (Contractor). Use:
+- A second Windows 11 user account on the same machine (`Win + L`, switch user),
+- A second physical machine, or
+- A Windows sandbox / VM signed in as the contractor.
+
+### Steps
+
+1. **Show the Policy Rules in the Admin Portal**
+   - Navigate to **Policy → Access Policy**.
+   - Walk through the four rules in order:
+
+   | # | Rule | Who | Gets |
+   |---|------|-----|------|
+   | 1 | `Allow-IT-Admins-Full` | dept=IT | Everything |
+   | 2 | `Allow-Engineers-WebSSH` | dept=Engineering | Web + SSH |
+   | 3 | `Allow-Contractors-WebOnly` | dept=Contractor | Web only |
+   | 4 | `Block-Shadow-App` | Everyone | Port 9090 blocked |
+
+   > "These rules are evaluated in order. The moment a rule matches, evaluation
+   > stops. No user ever gets access to something unless there's an explicit
+   > allow rule — that's zero-trust in action."
+
+2. **IT Admin persona (bob.jones) – Full Access**
+   - Switch to the session logged in as `bob.jones`.
+   - Run the user-access demo script:
+     ```powershell
+     .\scripts\windows\demo_user_access.ps1 -Persona ITAdmin
+     ```
+   - The script confirms `bob.jones` can reach **WebApps, RDP, FileShare, SSH**.
+   - Open **ZPA Client → Sessions** — show four active app sessions.
+
+   > "Bob is in the IT department, so he gets the full access rule. He can
+   > browse the web app, remote-desktop in, mount the file share, and SSH
+   > to the Linux server — all through ZPA, with zero VPN."
+
+3. **Contractor persona (carol.white) – Web Only**
+   - Switch to the session logged in as `carol.white`.
+   - Run the same script with a different persona:
+     ```powershell
+     .\scripts\windows\demo_user_access.ps1 -Persona Contractor
+     ```
+   - Web access **succeeds**; RDP, SSH, and SMB are **blocked**.
+   - Open **ZPA Client → Sessions** — only the WebApps session appears.
+
+   > "Carol is a contractor. She can use the web portal — that's all her job
+   > requires. If she tries to RDP into the server or mount a file share, the
+   > connection never even leaves her laptop. The app is invisible to her."
+
+4. **HR persona (dave.hr) – Complete Access Denied**
+   - If you have a third session, switch to `dave.hr` and run:
+     ```powershell
+     .\scripts\windows\demo_user_access.ps1 -Persona HR
+     ```
+   - **All** connections are blocked.
+   - Open **ZPA Client → Sessions** — no sessions whatsoever.
+
+   > "Dave is in HR. There are no allow rules for the HR department in our ZPA
+   > policy. Every private-app connection attempt is silently dropped. Dave
+   > doesn't get an error message — the apps are simply invisible to him."
+
+5. **Highlight the Log Explorer difference**
+   - Navigate to **Analytics → Log Explorer**.
+   - Filter by user = `bob.jones` — shows ALLOW entries for all four apps.
+   - Filter by user = `carol.white` — shows ALLOW for WebApps; BLOCK for RDP,
+     SSH, SMB.
+   - Filter by user = `dave.hr` — shows BLOCK entries for every attempt.
+
+   > "Every access attempt — allowed or denied — is logged with the user's
+   > full identity context. This is the audit trail compliance teams dream of."
+
+---
+
 ## Act 2 – App Discovery (7 min)
 
 ### Talking Points
@@ -130,46 +216,66 @@ Total run time: **20–30 minutes** (adjustable by skipping acts).
 
 ---
 
-## Act 3 – Policy Blocks (7 min)
+## Act 3 – Policy Blocks & Access Denied (7 min)
 
 ### Talking Points
 
-> "ZPA enforces least-privilege. Even if an application is discoverable on the
-> network, it's invisible unless there's an explicit policy that grants you
-> access. Watch what happens when I try to reach the shadow app."
+> "ZPA enforces least-privilege at the packet level. Even if an application is
+> discoverable on the network, it is **invisible** unless there's an explicit
+> policy that grants you access. And the block is silent — the user gets a
+> timeout, not a 'permission denied' that could reveal the app exists."
 
 ### Steps
 
-1. **From Windows 11 – try to reach the blocked app**
+1. **From Windows 11 – run the full block demo**
    ```powershell
    .\scripts\windows\demo_policy_blocks.ps1
    ```
-   The script attempts HTTP connections to `http://192.168.1.20:9090` and
-   `\\192.168.1.20\HiddenShare` and logs the results. Every attempt will
-   show a **timeout / connection refused** response.
+   The script attempts connections to:
+   - `http://192.168.1.20:9090` — Shadow IT app (no policy for any user)
+   - TCP 1433 — SQL Server (not in any segment)
+   - TCP 5432 — PostgreSQL (not in any segment)
+   - TCP 6379 — Redis (not in any segment)
+   - TCP 27017 — MongoDB (not in any segment)
+   - `\\192.168.1.20\HiddenShare` — unauthorised SMB share
+
+   All attempts show **green BLOCKED** output.
 
 2. **Show the ZPA Client – No Session Created**
    - Open **ZPA Client → Sessions**.
-   - Confirm there is **no session** for port 9090 – the request never left
+   - Confirm there is **no session** for port 9090 — the request never left
      the client.
 
    > "There is no 'deny' packet even reaching the application server. The
    > traffic simply never leaves the device. The app is invisible to the user
    > and their machine."
 
-3. **Show the Log in the Portal**
+3. **Contractor trying admin resources**
+   - Switch to `carol.white` (Contractor) session.
+   - Run:
+     ```powershell
+     .\scripts\windows\demo_user_access.ps1 -Persona Contractor -ShowDenied
+     ```
+   - The script tries RDP, SSH, and SMB — all blocked.
+   - Show **ZPA Client → Sessions** — only the WebApps session appears.
+
+   > "Carol got exactly what the policy says: web access only. She can't
+   > lateral-move to the server even if her machine is compromised, because
+   > the policy doesn't allow it."
+
+4. **Show the Log in the Portal**
    - Navigate to **Log Explorer** (or **Analytics → Private Access Logs**).
    - Filter by the Windows 11 machine's user or IP.
-   - Show the `BLOCK` entries for port 9090.
+   - Show the `BLOCK` entries for port 9090 and for Carol's RDP attempts.
 
-   > "Every attempted access – allowed or blocked – is logged with full
+   > "Every attempted access — allowed or blocked — is logged with full
    > user-identity context. You get who, what, when, from where, and with
    > what device posture."
 
-4. **Grant Access in Real Time (optional power move)**
-   - In **Policy → Access Policy**, add `Lab-Shadow-App` to the allow rule.
-   - Back on Windows 11, re-run the script – the connection succeeds in
-     seconds.
+5. **Grant Access in Real Time (optional power move)**
+   - In **Policy → Access Policy**, add `Lab-Shadow-App` to the IT Admin rule.
+   - Back on Windows 11 (as `bob.jones`), re-run the script — the connection
+     succeeds in seconds.
    - Remove the rule again to restore the block.
 
    > "Policy changes are pushed globally in under 60 seconds. No firewall
@@ -247,6 +353,8 @@ just-in-time provisioning.
 ## Post-Demo Next Steps
 
 1. Share the [ZPA Architecture White Paper](https://www.zscaler.com/resources/white-papers/zscaler-private-access.pdf).
-2. Offer a **Proof of Value (PoV)** with customer's own apps.
-3. Discuss integration with customer's IdP (Azure AD, Okta, Ping, etc.).
-4. Explore ZPA for Workloads (cloud-to-cloud segmentation).
+2. Offer a **Proof of Value (PoV)** with customer's own apps and their real user groups.
+3. Discuss integration with customer's IdP (Azure AD, Okta, Ping, etc.) to map their existing groups to ZPA policies.
+4. Show how the four-persona policy model maps directly to their org chart.
+5. Explore ZPA for Workloads (cloud-to-cloud segmentation).
+6. Discuss replacing the customer's VPN concentrator and jump/bastion servers with ZPA + PRA.
