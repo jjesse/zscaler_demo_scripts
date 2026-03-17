@@ -57,6 +57,18 @@ Server 2022**, and one **Ubuntu 22.04 Server**.
 - **Workload-to-Workload Segmentation** – server-to-server policies so lateral
   movement is impossible even inside the data-centre.
 
+### Persona Access Matrix
+
+| Resource | bob.jones (IT) | alice.smith (Eng) | carol.white (Contractor) | dave.hr (HR) |
+|----------|:--------------:|:-----------------:|:------------------------:|:------------:|
+| Web Portal (80/443/8080) | ✅ | ✅ | ✅ | ❌ |
+| SSH (22) | ✅ | ✅ | ❌ | ❌ |
+| RDP (3389) | ✅ | ❌ | ❌ | ❌ |
+| File Share (445) | ✅ | ❌ | ❌ | ❌ |
+| Shadow IT / DBs | ❌ | ❌ | ❌ | ❌ |
+
+❌ = **silent timeout** — the app is invisible to the user, not a permission error.
+
 ---
 
 ## Lab Topology

@@ -22,6 +22,46 @@ Total run time: **25–35 minutes** (adjustable by skipping acts).
 
 ---
 
+## ⚡ Boss-Friendly 10-Minute Highlight Reel
+
+If you have limited time, run this cut-down version. It covers the three
+moments that land hardest with executives:
+
+| # | What to Show | Time |
+|---|-------------|------|
+| 1 | IT Admin (`bob.jones`) browses web app + opens RDP in browser | 2 min |
+| 2 | Contractor (`carol.white`) — same machine, web works, RDP is silently blocked | 3 min |
+| 3 | HR Analyst (`dave.hr`) — everything blocked, ZPA Client shows zero sessions | 2 min |
+| 4 | In ZPA portal: show Log Explorer — ALLOW + BLOCK entries, all with user identity | 3 min |
+
+**Talking track for each transition:**
+- *"Bob is IT — he gets everything."*
+- *"Carol is a contractor — she only gets what she needs to do her job."*
+- *"Dave is HR — he has no business touching these servers. ZPA makes them invisible to him."*
+- *"And every attempt, whether allowed or denied, is logged with the user's full identity."*
+
+> **Pre-stage tip:** Run `generate_zpa_traffic.ps1` and `demo_user_access.ps1`
+> for all three personas 10 minutes before the meeting so the Log Explorer
+> is already populated when you switch to Act 4.
+
+---
+
+## Persona Access Matrix (Quick Reference)
+
+| Resource | bob.jones (IT) | alice.smith (Eng) | carol.white (Contractor) | dave.hr (HR) |
+|----------|:--------------:|:-----------------:|:------------------------:|:------------:|
+| Web Portal (80/443/8080) | ✅ Allow | ✅ Allow | ✅ Allow | ❌ Deny |
+| SSH (22) | ✅ Allow | ✅ Allow | ❌ Deny | ❌ Deny |
+| RDP (3389) | ✅ Allow | ❌ Deny | ❌ Deny | ❌ Deny |
+| File Share (445) | ✅ Allow | ❌ Deny | ❌ Deny | ❌ Deny |
+| Shadow IT App (9090) | ❌ Deny | ❌ Deny | ❌ Deny | ❌ Deny |
+| DB ports (1433/5432/6379) | ❌ Deny | ❌ Deny | ❌ Deny | ❌ Deny |
+
+> ❌ Deny = silent timeout. The app is **invisible** — no error, no response,
+> no indication the service even exists.
+
+---
+
 ## Pre-Demo Checklist
 
 - [ ] ZPA Admin Portal open in a browser tab (split screen or second monitor).
@@ -57,10 +97,12 @@ Total run time: **25–35 minutes** (adjustable by skipping acts).
 
 2. **Show the Policy**
    - Navigate to **Policy → Access Policy**.
-   - Show `Allow-Lab-Users-WebRDP-SMB` – conditional on IdP attribute.
+   - Show the four rules at a glance — point to `Allow-IT-Admins-Full` as the
+     first rule.
 
    > "Access is conditional on identity. The moment I remove a user from the
-   > `Lab` group in our IdP, their access disappears in real time."
+   > `IT` group in our IdP, their access disappears in real time — no firewall
+   > ticket, no maintenance window."
 
 3. **Live Access Demo – HTTP**
    - On the **Windows 11 client**, open a browser and navigate to
