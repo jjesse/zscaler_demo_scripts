@@ -43,7 +43,7 @@ lab: one **Windows 11 client**, one **Windows Server 2022**, and one
 1. Read **[Lab Setup](docs/Lab_Setup.md)** to understand the topology,
    pre-requisites, and the four demo user personas (IT Admin, Engineer,
    Contractor, HR).
-2. Follow **[ZPA Demo Guide](docs/ZPA_Demo_Guide.md)** for the full
+2. Follow **[ZPA Demo Guide](docs/zpa/ZPA_Demo_Guide.md)** for the full
    step-by-step demo flow, including:
    - Verified private-app access via ZPA
    - **Granular per-user access control** (Act 1.5 – the "wow" moment)
@@ -146,32 +146,32 @@ lab: one **Windows 11 client**, one **Windows Server 2022**, and one
 ## Lab Topology
 
 ```
-Internet / ZPA Cloud
-        │
-    ┌───┴───────────────────────────────────────────┐
-    │              ZPA Tenant (cloud)                │
-    │  ┌──────────────┐   ┌────────────────────────┐│
-    │  │  ZPA Broker  │   │  Admin Portal          ││
-    │  └──────┬───────┘   └────────────────────────┘│
-    └─────────┼──────────────────────────────────────┘
-              │  mTLS  (outbound-only from connector)
-    ┌─────────┴──────────────────────────────────────┐
-    │               Lab Network (192.168.1.0/24)      │
-    │                                                  │
-    │  ┌──────────────────┐  ┌──────────────────────┐ │
-    │  │  Ubuntu 22.04    │  │  Windows Server 2022 │ │
-    │  │  App Connector   │  │  Internal Apps:      │ │
-    │  │  192.168.1.10    │  │  IIS (HTTP/HTTPS)    │ │
-    │  └──────────────────┘  │  RDP (3389)          │ │
-    │                         │  SMB (445)           │ │
-    │                         │  192.168.1.20        │ │
-    │                         └──────────────────────┘ │
-    │                                                   │
-    │  ┌──────────────────┐                            │
-    │  │  Windows 11      │  (ZPA Client installed)    │
-    │  │  192.168.1.30    │                            │
-    │  └──────────────────┘                            │
-    └───────────────────────────────────────────────────┘
+Internet / ZIA Cloud / ZPA Cloud
+         │
+    ┌────┴──────────────────────────────────────────────┐
+    │          Zscaler Zero Trust Exchange (cloud)       │
+    │  ┌──────────────┐   ┌─────────────────────────────┐│
+    │  │  ZPA Broker  │   │  ZIA Gateway (SSL Inspect)  ││
+    │  └──────┬───────┘   └─────────────────────────────┘│
+    └─────────┼─────────────────────────────────────────┘
+              │  mTLS (outbound-only from ZPA connector)
+    ┌─────────┴───────────────────────────────────────────┐
+    │               Lab Network (192.168.1.0/24)           │
+    │                                                       │
+    │  ┌──────────────────┐  ┌──────────────────────────┐  │
+    │  │  Ubuntu 22.04    │  │  Windows Server 2022     │  │
+    │  │  ZPA Connector   │  │  Internal Apps:          │  │
+    │  │  ZIA Proxy/Client│  │  IIS (HTTP/HTTPS)        │  │
+    │  │  192.168.1.10    │  │  RDP (3389)              │  │
+    │  └──────────────────┘  │  SMB (445)               │  │
+    │                         │  192.168.1.20            │  │
+    │                         └──────────────────────────┘  │
+    │                                                        │
+    │  ┌──────────────────┐                                 │
+    │  │  Windows 11      │  (ZPA + ZIA Client installed)   │
+    │  │  192.168.1.30    │                                 │
+    │  └──────────────────┘                                 │
+    └────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -179,7 +179,7 @@ Internet / ZPA Cloud
 ## Repository Structure
 
 ```
-zpa_demo/
+zscaler_demo/
 ├── README.md
 ├── docs/
 │   ├── Lab_Setup.md          # Pre-requisites, topology, ZPA tenant config, user personas
