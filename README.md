@@ -1,9 +1,9 @@
-# ZPA & ZIA Demo – Zscaler Lab Kit
+# ZPA, ZIA & ZDX Demo – Zscaler Lab Kit
 
-A complete, hands-on demo kit for **Zscaler Private Access (ZPA)** and
-**Zscaler Internet Access (ZIA)** built around a typical Sales-Engineer home
-lab: one **Windows 11 client**, one **Windows Server 2022**, and one
-**Ubuntu 22.04 Server**.
+A complete, hands-on demo kit for **Zscaler Private Access (ZPA)**,
+**Zscaler Internet Access (ZIA)**, and **Zscaler Digital Experience (ZDX)**
+built around a typical Sales-Engineer home lab: one **Windows 11 client**, one
+**Windows Server 2022**, and one **Ubuntu 22.04 Server**.
 
 ---
 
@@ -33,6 +33,14 @@ lab: one **Windows 11 client**, one **Windows Server 2022**, and one
 | Linux ZIA block demo | `scripts/linux/demo_zia_blocks.sh` |
 | Windows ZIA traffic generator | `scripts/windows/generate_zia_traffic.ps1` |
 | Windows ZIA block demo | `scripts/windows/demo_zia_blocks.ps1` |
+
+### Zscaler Digital Experience (ZDX)
+
+| Area | Files |
+|------|-------|
+| End-to-end ZDX demo walkthrough | `docs/zdx/ZDX_Demo_Guide.md` |
+| Windows ZDX good/poor score demo | `scripts/zdx/windows/demo_zdx_scores.ps1` |
+| Linux ZDX good/poor score demo | `scripts/zdx/linux/demo_zdx_scores.sh` |
 
 ---
 
@@ -76,6 +84,34 @@ lab: one **Windows 11 client**, one **Windows Server 2022**, and one
    bash scripts/linux/demo_zia_blocks.sh
    ```
 
+### ZDX Demo
+
+1. Ensure Zscaler Client Connector (v3.7+) is installed and **Connected** on
+   the Windows 11 client and Ubuntu machine — ZDX data collection is built into
+   the Client Connector.
+2. Follow **[ZDX Demo Guide](docs/zdx/ZDX_Demo_Guide.md)** for the four-act demo:
+   - ZDX Score Dashboard — real-time view of every user's digital experience
+   - Path Tracing & Root Cause — pinpoint exactly where experience is poor
+   - **Good scores vs poor scores** — live contrast shown in the ZDX portal
+   - Proactive Alerting & Remediation — fix problems before users call IT
+3. Run the score simulation scripts:
+   ```powershell
+   # Windows 11 – baseline good score (run 10 min before the meeting)
+   .\scripts\zdx\windows\demo_zdx_scores.ps1 -Scenario Good
+
+   # Windows 11 – degrade experience live during the meeting
+   .\scripts\zdx\windows\demo_zdx_scores.ps1 -Scenario Poor
+
+   # Windows 11 – restore healthy state after the demo
+   .\scripts\zdx\windows\demo_zdx_scores.ps1 -Scenario Restore
+   ```
+   ```bash
+   # Ubuntu – same in bash
+   bash scripts/zdx/linux/demo_zdx_scores.sh --scenario good &
+   bash scripts/zdx/linux/demo_zdx_scores.sh --scenario poor
+   bash scripts/zdx/linux/demo_zdx_scores.sh --scenario restore
+   ```
+
 ---
 
 ## Demo Highlights
@@ -113,6 +149,23 @@ lab: one **Windows 11 client**, one **Windows Server 2022**, and one
   risk scores; block or restrict in real time.
 - **Full Analytics** – Web Insights dashboard shows every request with user
   identity, URL, category, action, and bytes.
+
+### ZDX Highlights
+
+- **Real-Time ZDX Score Dashboard** – every endpoint shown as a coloured dot
+  (green / yellow / orange / red) so IT sees problems before users call.
+- **Good Score vs Poor Score Demo** – run the simulation scripts live and watch
+  the score drop from 80+ (green) to below 40 (red) in the portal.
+- **End-to-End Path Tracing** – ZDX shows latency and packet loss at every hop
+  from device → Wi-Fi → corporate network → Zscaler PoP → ISP → SaaS app.
+- **Device Health Metrics** – CPU, RAM, battery, and Wi-Fi signal from the
+  endpoint, so IT can distinguish network problems from device problems.
+- **Per-Application Scoring** – independent scores for Microsoft 365, Zoom,
+  Salesforce, Workday, and any custom SaaS application.
+- **Proactive Alerting** – alerts fire on score thresholds before the help desk
+  receives a single ticket.
+- **No Additional Agent** – ZDX is built into Zscaler Client Connector; if ZPA
+  or ZIA is deployed, ZDX can be enabled instantly.
 
 ### ZPA Persona Access Matrix
 
@@ -182,22 +235,42 @@ Internet / ZIA Cloud / ZPA Cloud
 zscaler_demo/
 ├── README.md
 ├── docs/
-│   ├── Lab_Setup.md          # Pre-requisites, topology, ZPA tenant config, user personas
-│   ├── ZPA_Demo_Guide.md     # Narrated 5-act ZPA demo flow for a customer meeting
-│   └── ZIA_Demo_Guide.md     # Narrated 4-act ZIA demo flow for a customer meeting
+│   ├── ZIA_Demo_Guide.md     # Legacy ZIA demo guide (see docs/zia/ for the full kit)
+│   ├── zia/
+│   │   ├── Lab_Setup.md          # ZIA pre-requisites and topology
+│   │   └── ZIA_Demo_Guide.md     # Narrated 5-act ZIA demo flow for a customer meeting
+│   ├── zpa/
+│   │   ├── Lab_Setup.md          # ZPA pre-requisites, topology, user personas
+│   │   └── ZPA_Demo_Guide.md     # Narrated 5-act ZPA demo flow for a customer meeting
+│   └── zdx/
+│       └── ZDX_Demo_Guide.md     # Narrated 4-act ZDX demo: good scores, poor scores, path tracing
 └── scripts/
-    ├── linux/
-    │   ├── setup_app_connector.sh      # One-shot ZPA connector install & enrol
-    │   ├── generate_zpa_traffic.sh     # Continuous traffic against private apps (ZPA)
-    │   ├── demo_discovered_apps.sh     # Start services that trigger ZPA App Discovery
-    │   ├── demo_user_access.sh         # ZPA per-user access demo (Act 1.5)
-    │   ├── generate_zia_traffic.sh     # Traffic to internet sites across URL categories (ZIA)
-    │   └── demo_zia_blocks.sh          # Attempt blocked/malicious URLs — show ZIA blocks
-    └── windows/
-        ├── setup_internal_apps.ps1     # IIS + RDP + SMB on Windows Server
-        ├── generate_zpa_traffic.ps1    # HTTP/RDP/SMB traffic from Windows client (ZPA)
-        ├── demo_policy_blocks.ps1      # Attempt blocked ZPA destinations & log results
-        ├── demo_user_access.ps1        # ZPA per-user access demo (Act 1.5)
-        ├── generate_zia_traffic.ps1    # Traffic to internet sites across URL categories (ZIA)
-        └── demo_zia_blocks.ps1         # Attempt blocked/malicious URLs — show ZIA blocks
+    ├── linux/                      # Legacy Linux scripts
+    ├── windows/                    # Legacy Windows scripts
+    ├── zia/
+    │   ├── linux/
+    │   │   ├── setup_zia_client.sh         # ZIA Client Connector install
+    │   │   ├── generate_zia_traffic.sh     # Traffic across URL categories
+    │   │   └── demo_url_filtering.sh       # Demonstrate URL filter blocks
+    │   └── windows/
+    │       ├── generate_zia_traffic.ps1    # Traffic across URL categories (Windows)
+    │       ├── demo_threat_protection.ps1  # EICAR and phishing block demo
+    │       ├── demo_cloud_app_control.ps1  # Sanctioned vs unsanctioned app demo
+    │       └── demo_dlp.ps1                # DLP credit-card / SSN block demo
+    ├── zpa/
+    │   ├── linux/
+    │   │   ├── setup_app_connector.sh      # One-shot ZPA connector install & enrol
+    │   │   ├── generate_zpa_traffic.sh     # Continuous traffic against private apps
+    │   │   ├── demo_discovered_apps.sh     # Start services that trigger App Discovery
+    │   │   └── demo_user_access.sh         # ZPA per-user access demo (Act 1.5)
+    │   └── windows/
+    │       ├── setup_internal_apps.ps1     # IIS + RDP + SMB on Windows Server
+    │       ├── generate_zpa_traffic.ps1    # HTTP/RDP/SMB traffic from Windows client
+    │       ├── demo_policy_blocks.ps1      # Attempt blocked ZPA destinations & log results
+    │       └── demo_user_access.ps1        # ZPA per-user access demo (Act 1.5)
+    └── zdx/
+        ├── linux/
+        │   └── demo_zdx_scores.sh          # Simulate good/poor ZDX scores (Linux)
+        └── windows/
+            └── demo_zdx_scores.ps1         # Simulate good/poor ZDX scores (Windows)
 ```
