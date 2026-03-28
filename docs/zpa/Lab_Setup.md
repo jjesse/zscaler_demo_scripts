@@ -230,7 +230,7 @@ power the full multi-user demo in Act 1.5 of the ZPA Demo Guide.
 Run the install script as root on the Ubuntu Server:
 
 ```bash
-sudo bash scripts/linux/setup_app_connector.sh
+sudo bash scripts/zpa/linux/setup_app_connector.sh
 ```
 
 The script will:
@@ -250,7 +250,7 @@ Run the PowerShell setup script on the Windows Server as an **Administrator**:
 
 ```powershell
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-.\scripts\windows\setup_internal_apps.ps1
+.\scripts\zpa\windows\setup_internal_apps.ps1
 ```
 
 The script installs and configures:

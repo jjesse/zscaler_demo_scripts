@@ -13,26 +13,30 @@ built around a typical Sales-Engineer home lab: one **Windows 11 client**, one
 
 | Area | Files |
 |------|-------|
-| Lab architecture & setup | `docs/Lab_Setup.md` |
-| End-to-end ZPA demo walkthrough | `docs/ZPA_Demo_Guide.md` |
-| Ubuntu App Connector setup | `scripts/linux/setup_app_connector.sh` |
-| Linux ZPA traffic generator | `scripts/linux/generate_zpa_traffic.sh` |
-| App Discovery demo (Linux) | `scripts/linux/demo_discovered_apps.sh` |
-| Per-user access demo (Linux) | `scripts/linux/demo_user_access.sh` |
-| Windows ZPA traffic generator | `scripts/windows/generate_zpa_traffic.ps1` |
-| Windows policy-block demo | `scripts/windows/demo_policy_blocks.ps1` |
-| Per-user access demo (Windows) | `scripts/windows/demo_user_access.ps1` |
-| Windows Server internal-app setup | `scripts/windows/setup_internal_apps.ps1` |
+| Lab architecture & setup | `docs/zpa/Lab_Setup.md` |
+| End-to-end ZPA demo walkthrough | `docs/zpa/ZPA_Demo_Guide.md` |
+| Ubuntu App Connector setup | `scripts/zpa/linux/setup_app_connector.sh` |
+| Linux ZPA traffic generator | `scripts/zpa/linux/generate_zpa_traffic.sh` |
+| App Discovery demo (Linux) | `scripts/zpa/linux/demo_discovered_apps.sh` |
+| Per-user access demo (Linux) | `scripts/zpa/linux/demo_user_access.sh` |
+| Windows ZPA traffic generator | `scripts/zpa/windows/generate_zpa_traffic.ps1` |
+| Windows policy-block demo | `scripts/zpa/windows/demo_policy_blocks.ps1` |
+| Per-user access demo (Windows) | `scripts/zpa/windows/demo_user_access.ps1` |
+| Windows Server internal-app setup | `scripts/zpa/windows/setup_internal_apps.ps1` |
 
 ### Zscaler Internet Access (ZIA)
 
 | Area | Files |
 |------|-------|
-| End-to-end ZIA demo walkthrough | `docs/ZIA_Demo_Guide.md` |
-| Linux ZIA traffic generator | `scripts/linux/generate_zia_traffic.sh` |
-| Linux ZIA block demo | `scripts/linux/demo_zia_blocks.sh` |
-| Windows ZIA traffic generator | `scripts/windows/generate_zia_traffic.ps1` |
-| Windows ZIA block demo | `scripts/windows/demo_zia_blocks.ps1` |
+| Lab setup & prerequisites | `docs/zia/Lab_Setup.md` |
+| End-to-end ZIA demo walkthrough | `docs/zia/ZIA_Demo_Guide.md` |
+| ZIA client setup (Ubuntu) | `scripts/zia/linux/setup_zia_client.sh` |
+| Linux ZIA traffic generator | `scripts/zia/linux/generate_zia_traffic.sh` |
+| Linux ZIA URL-filter demo | `scripts/zia/linux/demo_url_filtering.sh` |
+| Windows ZIA traffic generator | `scripts/zia/windows/generate_zia_traffic.ps1` |
+| Windows threat protection demo | `scripts/zia/windows/demo_threat_protection.ps1` |
+| Windows cloud app control demo | `scripts/zia/windows/demo_cloud_app_control.ps1` |
+| Windows DLP demo | `scripts/zia/windows/demo_dlp.ps1` |
 
 ### Zscaler Digital Experience (ZDX)
 
@@ -42,13 +46,20 @@ built around a typical Sales-Engineer home lab: one **Windows 11 client**, one
 | Windows ZDX good/poor score demo | `scripts/zdx/windows/demo_zdx_scores.ps1` |
 | Linux ZDX good/poor score demo | `scripts/zdx/linux/demo_zdx_scores.sh` |
 
+### Lab Reset (all products)
+
+| Area | Files |
+|------|-------|
+| Reset lab between demos (Linux) | `scripts/reset_lab.sh` |
+| Reset lab between demos (Windows) | `scripts/reset_lab.ps1` |
+
 ---
 
 ## Quick Start
 
 ### ZPA Demo
 
-1. Read **[Lab Setup](docs/Lab_Setup.md)** to understand the topology,
+1. Read **[Lab Setup](docs/zpa/Lab_Setup.md)** to understand the topology,
    pre-requisites, and the four demo user personas (IT Admin, Engineer,
    Contractor, HR).
 2. Follow **[ZPA Demo Guide](docs/zpa/ZPA_Demo_Guide.md)** for the full
@@ -65,23 +76,29 @@ built around a typical Sales-Engineer home lab: one **Windows 11 client**, one
 
 1. Ensure Zscaler Client Connector is installed and connected on the Windows 11
    client and Ubuntu machine (or a ZIA PAC/proxy is configured).
-2. Follow **[ZIA Demo Guide](docs/ZIA_Demo_Guide.md)** for the four-act demo:
-   - SSL inspection and inline proxy visibility
-   - URL filtering across News, Social, Sports, Streaming, and Business categories
-   - Threat protection — malware, phishing, and C2 blocking
-   - Analytics, shadow-IT discovery, and Cloud App Control
-3. Run the traffic generator and block-demo scripts:
+2. Follow **[ZIA Demo Guide](docs/zia/ZIA_Demo_Guide.md)** for the five-act demo:
+   - SSL inspection and full traffic visibility
+   - Advanced threat protection — malware, phishing, and C2 blocking
+   - Cloud App Control — sanctioned vs. unsanctioned apps
+   - Data Loss Prevention (DLP)
+   - Analytics, Log Explorer, and shadow-IT discovery
+3. Run the traffic generator and demo scripts:
    ```powershell
    # Windows 11 – populate dashboards before the meeting
-   .\scripts\windows\generate_zia_traffic.ps1
+   .\scripts\zia\windows\generate_zia_traffic.ps1
 
-   # Windows 11 – demonstrate blocks live during the meeting
-   .\scripts\windows\demo_zia_blocks.ps1
+   # Windows 11 – demonstrate threat blocks live during the meeting
+   .\scripts\zia\windows\demo_threat_protection.ps1
+
+   # Windows 11 – demonstrate DLP blocks
+   .\scripts\zia\windows\demo_dlp.ps1
    ```
    ```bash
-   # Ubuntu – same in bash
-   bash scripts/linux/generate_zia_traffic.sh &
-   bash scripts/linux/demo_zia_blocks.sh
+   # Ubuntu – traffic generator in the background
+   bash scripts/zia/linux/generate_zia_traffic.sh &
+
+   # Ubuntu – demonstrate URL filter and threat blocks
+   bash scripts/zia/linux/demo_url_filtering.sh
    ```
 
 ### ZDX Demo
@@ -111,6 +128,27 @@ built around a typical Sales-Engineer home lab: one **Windows 11 client**, one
    bash scripts/zdx/linux/demo_zdx_scores.sh --scenario poor
    bash scripts/zdx/linux/demo_zdx_scores.sh --scenario restore
    ```
+
+### Resetting Between Demos
+
+After a demo session, run the lab reset script to stop all background
+processes, clear log files, and restore a clean baseline:
+
+```bash
+# Ubuntu (full reset – ZPA, ZIA, and ZDX)
+sudo bash scripts/reset_lab.sh
+
+# Ubuntu (ZDX only – stop poor-score simulation and restore good score)
+sudo bash scripts/reset_lab.sh --zdx
+```
+
+```powershell
+# Windows 11 (full reset)
+.\scripts\reset_lab.ps1
+
+# Windows 11 (ZDX only)
+.\scripts\reset_lab.ps1 -ZDX
+```
 
 ---
 
@@ -235,7 +273,7 @@ Internet / ZIA Cloud / ZPA Cloud
 zscaler_demo/
 ├── README.md
 ├── docs/
-│   ├── ZIA_Demo_Guide.md     # Legacy ZIA demo guide (see docs/zia/ for the full kit)
+│   ├── ZIA_Demo_Guide.md     # Legacy redirect → see docs/zia/ZIA_Demo_Guide.md
 │   ├── zia/
 │   │   ├── Lab_Setup.md          # ZIA pre-requisites and topology
 │   │   └── ZIA_Demo_Guide.md     # Narrated 5-act ZIA demo flow for a customer meeting
@@ -245,15 +283,17 @@ zscaler_demo/
 │   └── zdx/
 │       └── ZDX_Demo_Guide.md     # Narrated 4-act ZDX demo: good scores, poor scores, path tracing
 └── scripts/
-    ├── linux/                      # Legacy Linux scripts
-    ├── windows/                    # Legacy Windows scripts
+    ├── linux/                      # Legacy Linux scripts (backward compatibility)
+    ├── windows/                    # Legacy Windows scripts (backward compatibility)
+    ├── reset_lab.sh                # Master lab-reset script (Linux) – run between demos
+    ├── reset_lab.ps1               # Master lab-reset script (Windows) – run between demos
     ├── zia/
     │   ├── linux/
     │   │   ├── setup_zia_client.sh         # ZIA Client Connector install
-    │   │   ├── generate_zia_traffic.sh     # Traffic across URL categories
-    │   │   └── demo_url_filtering.sh       # Demonstrate URL filter blocks
+    │   │   ├── generate_zia_traffic.sh     # Traffic across all URL categories
+    │   │   └── demo_url_filtering.sh       # Demonstrate URL filter and threat blocks
     │   └── windows/
-    │       ├── generate_zia_traffic.ps1    # Traffic across URL categories (Windows)
+    │       ├── generate_zia_traffic.ps1    # Traffic across all URL categories (Windows)
     │       ├── demo_threat_protection.ps1  # EICAR and phishing block demo
     │       ├── demo_cloud_app_control.ps1  # Sanctioned vs unsanctioned app demo
     │       └── demo_dlp.ps1                # DLP credit-card / SSN block demo

@@ -70,7 +70,7 @@ moments that land hardest with executives:
 - [ ] Windows Server IIS accessible at `http://192.168.1.20` (confirm before customer joins).
 - [ ] Ubuntu Server terminal open (to run traffic scripts).
 - [ ] Traffic generator script ready to paste:
-      `scripts/linux/generate_zpa_traffic.sh`
+      `scripts/zpa/linux/generate_zpa_traffic.sh`
 - [ ] Have a session **without** ZPA client to show "what it looks like without ZPA".
 - [ ] Four access policy rules configured (see Lab_Setup.md §2.4).
 
@@ -113,11 +113,11 @@ moments that land hardest with executives:
 4. **Start the traffic generator** (background, keeps dashboards live)
    - On the Ubuntu Server run:
      ```bash
-     sudo bash scripts/linux/generate_zpa_traffic.sh &
+     sudo bash scripts/zpa/linux/generate_zpa_traffic.sh &
      ```
    - On the Windows 11 client run (PowerShell, Administrator):
      ```powershell
-     .\scripts\windows\generate_zpa_traffic.ps1
+     .\scripts\zpa\windows\generate_zpa_traffic.ps1
      ```
 
 5. **Live Access Demo – RDP in Browser (Privileged Remote Access)**
@@ -172,7 +172,7 @@ one as **carol.white** (Contractor). Use:
    - Switch to the session logged in as `bob.jones`.
    - Run the user-access demo script:
      ```powershell
-     .\scripts\windows\demo_user_access.ps1 -Persona ITAdmin
+     .\scripts\zpa\windows\demo_user_access.ps1 -Persona ITAdmin
      ```
    - The script confirms `bob.jones` can reach **WebApps, RDP, FileShare, SSH**.
    - Open **ZPA Client → Sessions** — show four active app sessions.
@@ -185,7 +185,7 @@ one as **carol.white** (Contractor). Use:
    - Switch to the session logged in as `carol.white`.
    - Run the same script with a different persona:
      ```powershell
-     .\scripts\windows\demo_user_access.ps1 -Persona Contractor
+     .\scripts\zpa\windows\demo_user_access.ps1 -Persona Contractor
      ```
    - Web access **succeeds**; RDP, SSH, and SMB are **blocked**.
    - Open **ZPA Client → Sessions** — only the WebApps session appears.
@@ -197,7 +197,7 @@ one as **carol.white** (Contractor). Use:
 4. **HR persona (dave.hr) – Complete Access Denied**
    - If you have a third session, switch to `dave.hr` and run:
      ```powershell
-     .\scripts\windows\demo_user_access.ps1 -Persona HR
+     .\scripts\zpa\windows\demo_user_access.ps1 -Persona HR
      ```
    - **All** connections are blocked.
    - Open **ZPA Client → Sessions** — no sessions whatsoever.
@@ -230,7 +230,7 @@ one as **carol.white** (Contractor). Use:
 
 1. **Start the discovery demo script on Ubuntu Server**
    ```bash
-   sudo bash scripts/linux/demo_discovered_apps.sh
+   sudo bash scripts/zpa/linux/demo_discovered_apps.sh
    ```
    This starts several lightweight services on non-standard ports on the Ubuntu
    server that ZPA hasn't seen before.
@@ -253,7 +253,7 @@ one as **carol.white** (Contractor). Use:
 
 4. **Stop the discovery services** (after the demo beat)
    ```bash
-   sudo bash scripts/linux/demo_discovered_apps.sh --stop
+   sudo bash scripts/zpa/linux/demo_discovered_apps.sh --stop
    ```
 
 ---
@@ -271,7 +271,7 @@ one as **carol.white** (Contractor). Use:
 
 1. **From Windows 11 – run the full block demo**
    ```powershell
-   .\scripts\windows\demo_policy_blocks.ps1
+   .\scripts\zpa\windows\demo_policy_blocks.ps1
    ```
    The script attempts connections to:
    - `http://192.168.1.20:9090` — Shadow IT app (no policy for any user)
@@ -296,7 +296,7 @@ one as **carol.white** (Contractor). Use:
    - Switch to `carol.white` (Contractor) session.
    - Run:
      ```powershell
-     .\scripts\windows\demo_user_access.ps1 -Persona Contractor -ShowDenied
+     .\scripts\zpa\windows\demo_user_access.ps1 -Persona Contractor -ShowDenied
      ```
    - The script tries RDP, SSH, and SMB — all blocked.
    - Show **ZPA Client → Sessions** — only the WebApps session appears.
