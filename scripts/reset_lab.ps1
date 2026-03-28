@@ -59,17 +59,24 @@ $ResetZDX = $ZDX -or $ResetAll
 # ── Helper: stop jobs/processes matching a name pattern ───────────────────────
 function Stop-DemoProcess {
     param([string]$Pattern, [string]$Label)
-    $procs = Get-Process | Where-Object { $_.MainWindowTitle -like "*$Pattern*" -or $_.Name -like "*$Pattern*" }
+    $procs = Get-Process -ErrorAction SilentlyContinue |
+             Where-Object { $_.MainWindowTitle -like "*$Pattern*" -or $_.Name -like "*$Pattern*" }
     if ($procs) {
-        $procs | ForEach-Object { $_.Kill() }
+        $procs | ForEach-Object {
+            try {
+                $_.Kill()
+            } catch {
+                # Process may have already exited – not an error
+            }
+        }
         Write-Ok "Stopped process: $Label"
     }
     # Also stop any PowerShell jobs with matching command
     $jobs = Get-Job -State Running -ErrorAction SilentlyContinue |
             Where-Object { $_.Command -like "*$Pattern*" }
     if ($jobs) {
-        $jobs | Stop-Job
-        $jobs | Remove-Job -Force
+        $jobs | Stop-Job -ErrorAction SilentlyContinue
+        $jobs | Remove-Job -Force -ErrorAction SilentlyContinue
         Write-Ok "Stopped background job: $Label"
     }
 }

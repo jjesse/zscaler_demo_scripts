@@ -53,11 +53,12 @@ warn()    { echo -e "  ${YELLOW}[WARN]${NC}   $*"; }
 
 # ── Dependency check ──────────────────────────────────────────────────────────
 if ! command -v curl &>/dev/null; then
-  if command -v apt-get &>/dev/null; then
-    echo "curl not found – installing..."
+  if [[ "${EUID}" -eq 0 ]] && command -v apt-get &>/dev/null; then
+    echo "curl not found – installing (running as root)..."
     apt-get install -y -qq curl || { echo "Failed to install curl. Please install it manually." >&2; exit 1; }
   else
-    echo "curl is required but not installed. Please install it and retry." >&2
+    echo "curl is required but not installed." >&2
+    echo "Install it with: sudo apt-get install -y curl" >&2
     exit 1
   fi
 fi
@@ -116,6 +117,8 @@ BUSINESS_SITES=(
 )
 
 # Blocked – P2P / risky (expect curl to fail / get ZIA block page)
+# NOTE: malware.wicar.org is a safe test domain maintained specifically for
+# security awareness and AV/ATP testing. No actual malware is served.
 BLOCKED_SITES=(
   "https://www.bittorrent.com"
   "https://malware.wicar.org"

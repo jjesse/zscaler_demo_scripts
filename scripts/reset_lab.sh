@@ -144,9 +144,10 @@ if [[ "$RESET_ZDX" == "true" ]]; then
   # Run the good-score baseline (3 probe rounds, background)
   SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
   ZDX_SCRIPT="${SCRIPT_DIR}/zdx/linux/demo_zdx_scores.sh"
+  ZDX_RESET_LOG="/tmp/zdx_reset.log"
   if [[ -f "${ZDX_SCRIPT}" ]]; then
-    bash "${ZDX_SCRIPT}" --scenario good --count 3 &>/dev/null &
-    ok "Started ZDX good-score baseline (3 rounds in background)"
+    bash "${ZDX_SCRIPT}" --scenario good --count 3 &>"${ZDX_RESET_LOG}" &
+    ok "Started ZDX good-score baseline (3 rounds in background; log: ${ZDX_RESET_LOG})"
   else
     warn "ZDX script not found at ${ZDX_SCRIPT}"
     warn "Run manually: bash scripts/zdx/linux/demo_zdx_scores.sh --scenario good"
