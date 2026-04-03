@@ -46,6 +46,12 @@ built around a typical Sales-Engineer home lab: one **Windows 11 client**, one
 | Windows ZDX good/poor score demo | `scripts/zdx/windows/demo_zdx_scores.ps1` |
 | Linux ZDX good/poor score demo | `scripts/zdx/linux/demo_zdx_scores.sh` |
 
+### Zscaler Essentials (Bundle Demo)
+
+| Area | Files |
+|------|-------|
+| Essentials demo walkthrough + Platform upsell | `docs/essentials/ZIA_Essentials_Demo_Guide.md` |
+
 ### Lab Reset (all products)
 
 | Area | Files |
@@ -128,6 +134,19 @@ built around a typical Sales-Engineer home lab: one **Windows 11 client**, one
    bash scripts/zdx/linux/demo_zdx_scores.sh --scenario poor
    bash scripts/zdx/linux/demo_zdx_scores.sh --scenario restore
    ```
+
+### Zscaler Essentials Demo
+
+1. This demo uses the same lab environment and ZIA scripts as the full ZIA demo
+   but focuses on the capabilities included in the **Essentials** bundle.
+2. Follow **[ZIA Essentials Demo Guide](docs/essentials/ZIA_Essentials_Demo_Guide.md)** for the four-act demo:
+   - SSL Inspection and full traffic visibility
+   - Threat Protection — anti-virus and anti-phishing blocking
+   - URL Filtering — 200+ categories with bandwidth control
+   - Standard Reporting and Analytics
+3. The guide concludes with a structured **Upsell to Zscaler Platform** section
+   with side-by-side comparisons and talking points for Cloud Sandbox, DLP,
+   inline CASB, Browser Isolation, and Advanced Analytics.
 
 ### Resetting Between Demos
 
@@ -280,8 +299,10 @@ zscaler_demo/
 │   ├── zpa/
 │   │   ├── Lab_Setup.md          # ZPA pre-requisites, topology, user personas
 │   │   └── ZPA_Demo_Guide.md     # Narrated 5-act ZPA demo flow for a customer meeting
-│   └── zdx/
-│       └── ZDX_Demo_Guide.md     # Narrated 4-act ZDX demo: good scores, poor scores, path tracing
+│   ├── zdx/
+│   │   └── ZDX_Demo_Guide.md     # Narrated 4-act ZDX demo: good scores, poor scores, path tracing
+│   └── essentials/
+│       └── ZIA_Essentials_Demo_Guide.md  # Essentials bundle demo + Platform upsell
 └── scripts/
     ├── linux/                      # Legacy Linux scripts (backward compatibility)
     ├── windows/                    # Legacy Windows scripts (backward compatibility)
