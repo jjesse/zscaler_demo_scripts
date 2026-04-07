@@ -386,9 +386,15 @@ incident period, and exports the data for the post-incident review.
    existing ZCC deployment in hours; no infrastructure changes required.
 3. Ask the customer: *"Which SaaS application causes the most help desk tickets
    for performance complaints?"* — that is the first ZDX probe to configure.
-4. Show how ZDX + ZPA + ZIA together create a complete zero-trust + digital
-   experience observability platform.
+4. Show how ZDX + ZPA + ZIA + Deception together create a complete zero-trust +
+   digital-experience observability + threat detection platform.
 5. Discuss integration with the customer's ITSM (ServiceNow, Jira) so ZDX
    alerts automatically create and enrich tickets.
 6. Explore ZDX for Branch Offices — how ZDX gives visibility into remote-site
    performance, not just endpoint performance.
+7. Introduce **Zscaler Deception** as the threat-detection layer that completes
+   the platform story: ZIA secures the perimeter, ZPA controls lateral access,
+   ZDX monitors user experience, and Deception catches any attacker who gets
+   through — zero false positives, instant kill-chain reconstruction.  Use the
+   [Deception Demo Guide](../deception/Deception_Demo_Guide.md) to run a
+   combined platform demo.

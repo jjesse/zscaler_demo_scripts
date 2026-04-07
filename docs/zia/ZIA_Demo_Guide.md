@@ -343,3 +343,8 @@ tunnel, keeping their existing network topology intact.
    the full Zscaler Zero Trust Exchange.
 5. Explore ZIA for Branch Offices via SD-WAN integration.
 6. Discuss SIEM integration with the customer's existing Splunk / Sentinel setup.
+7. Introduce **Zscaler Deception** as the natural next layer: ZIA stops threats
+   at the perimeter, but Deception catches attackers who slip in through phishing
+   or stolen credentials — zero false positives, full kill chain, instant SOAR
+   response.  Run the [Deception Demo](../deception/Deception_Demo_Guide.md) to
+   show the complete assume-breach story.

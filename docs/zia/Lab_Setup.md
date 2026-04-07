@@ -209,3 +209,35 @@ Before running the demo, verify:
 | DLP rule not firing | Confirm DLP profile is attached to the correct rule. Check channel (HTTPS vs HTTP). |
 | `ip.zscaler.com` shows direct IP | Traffic not routing through ZIA. Check Client Connector is connected and proxy settings are active. |
 | Linux script fails | Verify `curl` and `wget` are installed; confirm system proxy env vars (`http_proxy`, `https_proxy`) are set. |
+
+---
+
+## 8. Extending the Lab: Zscaler Deception
+
+The ZIA lab environment can be extended with **Zscaler Deception** without any
+additional infrastructure changes.  The same Ubuntu server that runs
+`generate_zia_traffic.sh` also hosts the decoy honeypot services.
+
+To add the Deception demo to this lab:
+
+1. On the **Ubuntu server**, start the decoy services:
+   ```bash
+   sudo bash scripts/deception/linux/setup_decoy_services.sh
+   ```
+   This starts fake web, SSH, database, and file services alongside the
+   existing ZIA client, and plants credential breadcrumb files that an
+   attacker would find.
+
+2. Run the attacker simulation (from any machine on the lab subnet, or
+   locally with `--local`):
+   ```bash
+   sudo bash scripts/deception/linux/simulate_attacker.sh --local
+   ```
+
+3. Follow the full walkthrough in the
+   [Deception Demo Guide](../deception/Deception_Demo_Guide.md).
+
+**Talking track for the transition:**
+> *"ZIA stops threats at the internet perimeter. But what if an attacker
+> gets in through a phishing email? That's where Zscaler Deception comes in
+> — and I can show you that story right now, on the same lab."*

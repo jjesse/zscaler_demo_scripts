@@ -436,6 +436,28 @@ and compliance reporting, Platform's Advanced Analytics takes this to the
 next level with deep drill-downs, custom dashboards, and cross-product
 correlation."*
 
+#### 6. Deception Technology – Catch Post-Breach Attackers
+
+> "Everything we've shown today protects the perimeter — we inspect every
+> byte entering or leaving the organisation. But what about a threat that's
+> already inside? A phished credential, a compromised laptop, a supply-chain
+> attack? Zscaler Platform includes **Deception Technology**: fake servers,
+> fake credentials, and fake files scattered throughout the environment.
+> No legitimate user ever touches a decoy. If anything does, it's an attacker
+> — and the alert fires with 100% confidence, zero false positives.
+> The attacker's entire kill chain is reconstructed automatically."
+
+**Demo tie-in:** Say:
+*"Imagine an attacker got in through a phishing email. With Essentials, ZIA
+blocked the original malicious link. But suppose they used a different path.
+With Platform's Deception, the moment they start probing the internal
+network — checking open ports, trying a saved credential — they hit one of
+our fake assets. Alert fires. SOAR playbook isolates the machine. They don't
+get a second move."*
+
+For a live demonstration, see the [Deception Demo Guide](../deception/Deception_Demo_Guide.md)
+and the attacker simulation scripts in `scripts/deception/`.
+
 ### Closing the Upsell Conversation
 
 > "Here's the best part: **upgrading from Essentials to Platform requires
@@ -448,10 +470,13 @@ correlation."*
 
 1. Walk through the full [ZIA Demo Guide](../zia/ZIA_Demo_Guide.md) to show
    Cloud App Control and DLP live (these are Platform features demoed there).
-2. Propose a **phased Proof of Value**: Phase 1 with Essentials, Phase 2
+2. Run the [Deception Demo Guide](../deception/Deception_Demo_Guide.md) to
+   show the post-breach detection story — fake credentials, live attacker
+   simulation, zero-false-positive alerts, and one-click SOAR response.
+3. Propose a **phased Proof of Value**: Phase 1 with Essentials, Phase 2
    adding Platform capabilities.
-3. Share the [Zscaler Platform data sheet](https://www.zscaler.com/resources/data-sheets) and pricing comparison.
-4. Discuss the customer's compliance requirements (PCI-DSS, HIPAA, GDPR) —
+4. Share the [Zscaler Platform data sheet](https://www.zscaler.com/resources/data-sheets) and pricing comparison.
+5. Discuss the customer's compliance requirements (PCI-DSS, HIPAA, GDPR) —
    DLP and Advanced Analytics are often deal-clinchers for regulated industries.
-5. Position ZPA and ZDX as complementary products for a full Zero Trust
+6. Position ZPA and ZDX as complementary products for a full Zero Trust
    Exchange deployment.

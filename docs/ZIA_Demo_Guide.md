@@ -13,3 +13,15 @@ That guide includes:
 - Log Explorer / Analytics
 
 Please update any bookmarks or links to point to `docs/zia/ZIA_Demo_Guide.md`.
+
+---
+
+## Other Demo Guides
+
+| Product | Guide |
+|---------|-------|
+| ZIA (full) | [docs/zia/ZIA_Demo_Guide.md](zia/ZIA_Demo_Guide.md) |
+| ZPA | [docs/zpa/ZPA_Demo_Guide.md](zpa/ZPA_Demo_Guide.md) |
+| ZDX | [docs/zdx/ZDX_Demo_Guide.md](zdx/ZDX_Demo_Guide.md) |
+| ZIA Essentials + Upsell | [docs/essentials/ZIA_Essentials_Demo_Guide.md](essentials/ZIA_Essentials_Demo_Guide.md) |
+| Zscaler Deception | [docs/deception/Deception_Demo_Guide.md](deception/Deception_Demo_Guide.md) |

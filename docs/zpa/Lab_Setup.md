@@ -292,3 +292,51 @@ Before running the demo, verify:
 | Contractor can reach RDP | Verify `Allow-Contractors-WebOnly` rule does NOT include `Lab-RDP`. Check rule priority order. |
 | HR user can reach any app | Verify there is **no** allow rule with department = `HR`. The implicit-deny should block all access. |
 | Wrong user persona sees wrong access | Use *Policy Simulation* (Portal → Policy → Simulate) to test each persona against each app segment. |
+
+---
+
+## 7. Extending the Lab: Zscaler Deception
+
+The ZPA lab is the ideal backdrop for a **Zscaler Deception** demo because ZPA
+already demonstrates *prevention* of lateral movement; Deception then shows
+*detection* of any attacker who tries anyway.
+
+The standard three-machine lab extends to four machines for Deception:
+
+| Machine | IP | Role |
+|---------|----|------|
+| Ubuntu 22.04 (existing) | 192.168.1.10 | ZPA Connector + Decoy Services |
+| Windows Server 2022 (existing) | 192.168.1.20 | Internal Apps + Deception Tokens |
+| Windows 11 (existing) | 192.168.1.30 | ZPA Client + Deception Tokens |
+| Attacker (Linux/Kali, optional) | 192.168.1.40 | Runs simulate_attacker.sh |
+
+> **Two-machine shortcut:** No fourth machine is required.  Run the attacker
+> simulation with `--local` on the Ubuntu server to simulate a foothold there.
+
+To add the Deception demo to this lab:
+
+1. On **Ubuntu**, start the decoy services (after confirming the ZPA
+   App Connector is running):
+   ```bash
+   sudo bash scripts/deception/linux/setup_decoy_services.sh
+   ```
+
+2. On **Windows 11**, plant the deception tokens:
+   ```powershell
+   .\scripts\deception\windows\deploy_deception_tokens.ps1
+   ```
+
+3. Run the attacker simulation and narrate alongside the Deception portal:
+   ```bash
+   sudo bash scripts/deception/linux/simulate_attacker.sh --local
+   ```
+
+4. Follow the full walkthrough in the
+   [Deception Demo Guide](../deception/Deception_Demo_Guide.md).
+
+**Talking track for the transition:**
+> *"ZPA ensures users can only reach the applications they're explicitly
+> allowed to use.  But an attacker with stolen credentials bypasses that
+> by impersonating a legitimate user.  Zscaler Deception catches them the
+> moment they probe beyond their allowed boundaries — zero false positives,
+> full kill chain, instant response."*
