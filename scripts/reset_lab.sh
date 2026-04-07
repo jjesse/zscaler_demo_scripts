@@ -63,13 +63,15 @@ free_port() {
 RESET_ZPA=false
 RESET_ZIA=false
 RESET_ZDX=false
+RESET_DECEPTION=false
 RESET_ALL=true
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --zpa) RESET_ZPA=true; RESET_ALL=false; shift ;;
-    --zia) RESET_ZIA=true; RESET_ALL=false; shift ;;
-    --zdx) RESET_ZDX=true; RESET_ALL=false; shift ;;
+    --zpa)       RESET_ZPA=true;       RESET_ALL=false; shift ;;
+    --zia)       RESET_ZIA=true;       RESET_ALL=false; shift ;;
+    --zdx)       RESET_ZDX=true;       RESET_ALL=false; shift ;;
+    --deception) RESET_DECEPTION=true; RESET_ALL=false; shift ;;
     *) echo "Unknown argument: $1" >&2; exit 1 ;;
   esac
 done
@@ -78,6 +80,7 @@ if [[ "$RESET_ALL" == "true" ]]; then
   RESET_ZPA=true
   RESET_ZIA=true
   RESET_ZDX=true
+  RESET_DECEPTION=true
 fi
 
 echo ""
@@ -154,6 +157,42 @@ if [[ "$RESET_ZDX" == "true" ]]; then
   fi
 fi
 
+# ── Deception Reset ───────────────────────────────────────────────────────────
+if [[ "$RESET_DECEPTION" == "true" ]]; then
+  section "Deception – Stop Attacker Simulation and Decoy Services"
+
+  # Stop the attacker simulation and decoy service manager
+  kill_matching "simulate_attacker"    "Deception attacker simulation"
+  kill_matching "setup_decoy_services" "Deception decoy services"
+
+  # Stop any Python processes listening on decoy ports
+  for port in 8081 2222 3307 4445; do
+    free_port "${port}"
+  done
+
+  # Remove breadcrumb / token files planted by setup_decoy_services.sh
+  if [[ -d /tmp/deception_demo ]]; then
+    rm -rf /tmp/deception_demo
+    ok "Removed deception breadcrumb files from /tmp/deception_demo"
+  fi
+
+  # Remove decoy service PID and log files
+  for dir in /tmp/deception_pids /tmp/deception_logs; do
+    if [[ -d "${dir}" ]]; then
+      rm -rf "${dir}"
+      ok "Removed ${dir}"
+    fi
+  done
+
+  # Remove attacker simulation log
+  if [[ -f /tmp/deception_attacker_sim.log ]]; then
+    rm -f /tmp/deception_attacker_sim.log
+    ok "Removed attacker simulation log"
+  fi
+
+  ok "Deception reset complete"
+fi
+
 # ── Summary ───────────────────────────────────────────────────────────────────
 echo ""
 echo -e "${BOLD}${GREEN}============================================================${NC}"
@@ -173,5 +212,11 @@ fi
 if [[ "$RESET_ZIA" == "true" ]]; then
   echo "  • ZIA: Pre-populate dashboards (run 10 min before the meeting):"
   echo "    bash scripts/zia/linux/generate_zia_traffic.sh --count 2 &"
+fi
+if [[ "$RESET_DECEPTION" == "true" ]]; then
+  echo "  • Deception: Re-deploy decoys and tokens before the next meeting:"
+  echo "    sudo bash scripts/deception/linux/setup_decoy_services.sh"
+  echo "    Confirm Deception portal shows all decoys as Active."
+  echo "    Clear old alerts: Alerts → Active Alerts → Archive All"
 fi
 echo ""

@@ -1,9 +1,11 @@
-# ZPA, ZIA & ZDX Demo – Zscaler Lab Kit
+# ZPA, ZIA, ZDX & Deception Demo – Zscaler Lab Kit
 
 A complete, hands-on demo kit for **Zscaler Private Access (ZPA)**,
-**Zscaler Internet Access (ZIA)**, and **Zscaler Digital Experience (ZDX)**
-built around a typical Sales-Engineer home lab: one **Windows 11 client**, one
-**Windows Server 2022**, and one **Ubuntu 22.04 Server**.
+**Zscaler Internet Access (ZIA)**, **Zscaler Digital Experience (ZDX)**, and
+**Zscaler Deception** built around a typical Sales-Engineer home lab: one
+**Windows 11 client**, one **Windows Server 2022**, and one **Ubuntu 22.04
+Server**. Zscaler Deception optionally extends the lab with a fourth "attacker"
+machine (any Linux or Windows host on the same subnet).
 
 ---
 
@@ -45,6 +47,16 @@ built around a typical Sales-Engineer home lab: one **Windows 11 client**, one
 | End-to-end ZDX demo walkthrough | `docs/zdx/ZDX_Demo_Guide.md` |
 | Windows ZDX good/poor score demo | `scripts/zdx/windows/demo_zdx_scores.ps1` |
 | Linux ZDX good/poor score demo | `scripts/zdx/linux/demo_zdx_scores.sh` |
+
+### Zscaler Deception
+
+| Area | Files |
+|------|-------|
+| End-to-end Deception demo walkthrough | `docs/deception/Deception_Demo_Guide.md` |
+| Deploy decoy honeypot services (Linux) | `scripts/deception/linux/setup_decoy_services.sh` |
+| 5-phase attacker simulation (Linux) | `scripts/deception/linux/simulate_attacker.sh` |
+| Deploy deception tokens on Windows endpoint | `scripts/deception/windows/deploy_deception_tokens.ps1` |
+| 5-phase attacker simulation (Windows) | `scripts/deception/windows/simulate_attacker.ps1` |
 
 ### Zscaler Essentials (Bundle Demo)
 
@@ -148,17 +160,60 @@ built around a typical Sales-Engineer home lab: one **Windows 11 client**, one
    with side-by-side comparisons and talking points for Cloud Sandbox, DLP,
    inline CASB, Browser Isolation, and Advanced Analytics.
 
+### Zscaler Deception Demo
+
+1. Read **[Deception Demo Guide](docs/deception/Deception_Demo_Guide.md)** for
+   the full four-act walkthrough covering decoy deployment, attacker simulation,
+   alert investigation, and SOAR-driven response.
+
+2. **On the Ubuntu server** — deploy the decoy honeypot services at least
+   5 minutes before the meeting:
+   ```bash
+   sudo bash scripts/deception/linux/setup_decoy_services.sh
+   ```
+
+3. **On the Windows 11 client** — plant deception tokens on the endpoint
+   so the attacker simulation can find them:
+   ```powershell
+   .\scripts\deception\windows\deploy_deception_tokens.ps1
+   ```
+
+4. **During the demo** — run the attacker simulation live so the customer
+   watches alerts fire in real time:
+   ```bash
+   # From the attacker machine (or Ubuntu with --local)
+   sudo bash scripts/deception/linux/simulate_attacker.sh --local
+
+   # Or against a specific target
+   sudo bash scripts/deception/linux/simulate_attacker.sh --target 192.168.1.10
+   ```
+   ```powershell
+   # From the Windows 11 client
+   .\scripts\deception\windows\simulate_attacker.ps1 -TargetHost 192.168.1.10
+   ```
+
+5. After the demo, remove tokens and stop decoy services:
+   ```bash
+   sudo bash scripts/reset_lab.sh --deception
+   ```
+   ```powershell
+   .\scripts\reset_lab.ps1 -Deception
+   ```
+
 ### Resetting Between Demos
 
 After a demo session, run the lab reset script to stop all background
 processes, clear log files, and restore a clean baseline:
 
 ```bash
-# Ubuntu (full reset – ZPA, ZIA, and ZDX)
+# Ubuntu (full reset – ZPA, ZIA, ZDX, and Deception)
 sudo bash scripts/reset_lab.sh
 
 # Ubuntu (ZDX only – stop poor-score simulation and restore good score)
 sudo bash scripts/reset_lab.sh --zdx
+
+# Ubuntu (Deception only – stop decoy services and remove breadcrumb files)
+sudo bash scripts/reset_lab.sh --deception
 ```
 
 ```powershell
@@ -167,6 +222,9 @@ sudo bash scripts/reset_lab.sh --zdx
 
 # Windows 11 (ZDX only)
 .\scripts\reset_lab.ps1 -ZDX
+
+# Windows 11 (Deception only – remove tokens and clear logs)
+.\scripts\reset_lab.ps1 -Deception
 ```
 
 ---
@@ -223,6 +281,25 @@ sudo bash scripts/reset_lab.sh --zdx
   receives a single ticket.
 - **No Additional Agent** – ZDX is built into Zscaler Client Connector; if ZPA
   or ZIA is deployed, ZDX can be enabled instantly.
+
+### Zscaler Deception Highlights
+
+- **Assume Breach Posture** – Deception layers on top of ZIA and ZPA to catch
+  attackers who slip past the perimeter via phishing, stolen credentials, or
+  supply-chain compromise.
+- **Zero False Positives** – no legitimate user ever touches a decoy; every
+  alert is a confirmed, high-confidence incident requiring immediate action.
+- **Live Attacker Simulation** – run `simulate_attacker.sh` / `simulate_attacker.ps1`
+  during the meeting and watch 6+ Critical alerts fire in real time.
+- **Full Kill Chain Reconstruction** – the Deception portal's Attack Timeline
+  shows every step: recon → credential discovery → lateral movement → decoy touch.
+- **Deception Tokens / Lures** – fake AWS keys, SSH configs, `.env` files, and
+  browser-saved passwords are planted on real endpoints as bait.
+- **SOAR Integration** – one click isolates the attacker: ZPA policy updated,
+  ZIA quarantine applied, ServiceNow ticket opened — all automatically.
+- **Complements ZIA + ZPA** – demonstrates defence-in-depth: ZIA stops external
+  threats, ZPA limits blast radius, Deception catches active insider threats
+  and post-breach lateral movement.
 
 ### ZPA Persona Access Matrix
 
@@ -301,8 +378,10 @@ zscaler_demo/
 │   │   └── ZPA_Demo_Guide.md     # Narrated 5-act ZPA demo flow for a customer meeting
 │   ├── zdx/
 │   │   └── ZDX_Demo_Guide.md     # Narrated 4-act ZDX demo: good scores, poor scores, path tracing
-│   └── essentials/
-│       └── ZIA_Essentials_Demo_Guide.md  # Essentials bundle demo + Platform upsell
+│   ├── essentials/
+│   │   └── ZIA_Essentials_Demo_Guide.md  # Essentials bundle demo + Platform upsell
+│   └── deception/
+│       └── Deception_Demo_Guide.md       # Narrated 4-act Deception demo: decoys, attacker sim, SOAR
 └── scripts/
     ├── linux/                      # Legacy Linux scripts (backward compatibility)
     ├── windows/                    # Legacy Windows scripts (backward compatibility)
@@ -329,9 +408,16 @@ zscaler_demo/
     │       ├── generate_zpa_traffic.ps1    # HTTP/RDP/SMB traffic from Windows client
     │       ├── demo_policy_blocks.ps1      # Attempt blocked ZPA destinations & log results
     │       └── demo_user_access.ps1        # ZPA per-user access demo (Act 1.5)
-    └── zdx/
+    ├── zdx/
+    │   ├── linux/
+    │   │   └── demo_zdx_scores.sh          # Simulate good/poor ZDX scores (Linux)
+    │   └── windows/
+    │       └── demo_zdx_scores.ps1         # Simulate good/poor ZDX scores (Windows)
+    └── deception/
         ├── linux/
-        │   └── demo_zdx_scores.sh          # Simulate good/poor ZDX scores (Linux)
+        │   ├── setup_decoy_services.sh     # Start honeypot decoy services + plant breadcrumbs
+        │   └── simulate_attacker.sh        # 5-phase attacker simulation (triggers Deception alerts)
         └── windows/
-            └── demo_zdx_scores.ps1         # Simulate good/poor ZDX scores (Windows)
+            ├── deploy_deception_tokens.ps1 # Plant fake credentials and tokens on Windows endpoint
+            └── simulate_attacker.ps1       # 5-phase attacker simulation (Windows)
 ```

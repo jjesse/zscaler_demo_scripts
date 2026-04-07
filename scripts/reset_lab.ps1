@@ -1,13 +1,14 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-    Master lab-reset script for the ZPA / ZIA / ZDX demo (Windows).
+    Master lab-reset script for the ZPA / ZIA / ZDX / Deception demo (Windows).
 
 .DESCRIPTION
     Run this between demo sessions on the Windows 11 client or Windows Server
     to restore a clean, known-good baseline.  Suitable for:
       - Cleaning up between multiple back-to-back customer demos
       - Resetting after the ZDX "poor score" simulation
+      - Removing deception tokens after the Deception demo
       - Clearing log files and stopping background traffic generators
 
     The script stops all background demo processes, clears log files, and
@@ -23,6 +24,9 @@
 .PARAMETER ZDX
     Reset ZDX-related processes (stop poor-score simulation, restore baseline).
 
+.PARAMETER Deception
+    Remove deception tokens and clear attacker simulation logs.
+
 .EXAMPLE
     # Full reset – all products
     .\scripts\reset_lab.ps1
@@ -32,13 +36,17 @@
 
     # ZPA only – stop traffic generators and clear log files
     .\scripts\reset_lab.ps1 -ZPA
+
+    # Deception only – remove tokens and clear logs
+    .\scripts\reset_lab.ps1 -Deception
 #>
 
 [CmdletBinding()]
 param(
     [switch]$ZPA,
     [switch]$ZIA,
-    [switch]$ZDX
+    [switch]$ZDX,
+    [switch]$Deception
 )
 
 Set-StrictMode -Version Latest
@@ -51,10 +59,11 @@ function Write-Info    { param([string]$msg) Write-Host "  [INFO] $msg" -Foregro
 function Write-Section { param([string]$msg) Write-Host "`n  ━━━ $msg ━━━" -ForegroundColor Cyan }
 
 # If no specific switch, reset everything
-$ResetAll = -not ($ZPA -or $ZIA -or $ZDX)
-$ResetZPA = $ZPA -or $ResetAll
-$ResetZIA = $ZIA -or $ResetAll
-$ResetZDX = $ZDX -or $ResetAll
+$ResetAll       = -not ($ZPA -or $ZIA -or $ZDX -or $Deception)
+$ResetZPA       = $ZPA       -or $ResetAll
+$ResetZIA       = $ZIA       -or $ResetAll
+$ResetZDX       = $ZDX       -or $ResetAll
+$ResetDeception = $Deception -or $ResetAll
 
 # ── Helper: stop jobs/processes matching a name pattern ───────────────────────
 function Stop-DemoProcess {
@@ -174,6 +183,59 @@ if ($ResetZDX) {
     }
 }
 
+# ── Deception Reset ───────────────────────────────────────────────────────────
+if ($ResetDeception) {
+    Write-Section "Deception – Remove Tokens and Clear Attacker Simulation Logs"
+
+    Stop-DemoProcess -Pattern "simulate_attacker"    -Label "Deception attacker simulation"
+    Stop-DemoProcess -Pattern "deploy_deception_tokens" -Label "Deception token deployer"
+
+    # Remove deployed token files
+    $tokenPaths = @(
+        "$env:USERPROFILE\.aws\credentials",
+        "$env:USERPROFILE\.ssh\config",
+        "$env:USERPROFILE\Documents\Projects\webapp\.env",
+        "$env:USERPROFILE\Documents\Backups\db_backup.sql",
+        "$env:USERPROFILE\Downloads\passwords_export.csv",
+        "$env:USERPROFILE\Documents\vault_location.txt"
+    )
+    foreach ($path in $tokenPaths) {
+        if (Test-Path $path) {
+            Remove-Item $path -Force -ErrorAction SilentlyContinue
+            Write-Ok "Removed token: $path"
+        }
+    }
+
+    # Remove the fake SMB credential from Credential Manager
+    $null = cmdkey /delete:'\\192.168.1.10\CorpShare' 2>$null
+    Write-Ok "Removed fake SMB entry from Windows Credential Manager"
+
+    # Remove attacker simulation log
+    $simLog = "$env:TEMP\deception_attacker_sim.log"
+    if (Test-Path $simLog) {
+        Remove-Item $simLog -Force -ErrorAction SilentlyContinue
+        Write-Ok "Removed attacker simulation log: $simLog"
+    }
+
+    # Clean up empty directories we created
+    $dirsToClean = @(
+        "$env:USERPROFILE\.aws",
+        "$env:USERPROFILE\Documents\Projects\webapp",
+        "$env:USERPROFILE\Documents\Projects",
+        "$env:USERPROFILE\Documents\Backups"
+    )
+    foreach ($dir in $dirsToClean) {
+        if (Test-Path $dir) {
+            $items = Get-ChildItem $dir -ErrorAction SilentlyContinue
+            if (-not $items) {
+                Remove-Item $dir -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
+
+    Write-Ok "Deception reset complete"
+}
+
 # ── Summary ───────────────────────────────────────────────────────────────────
 Write-Host ""
 Write-Host "============================================================" -ForegroundColor Green
@@ -193,5 +255,10 @@ if ($ResetZPA) {
 if ($ResetZIA) {
     Write-Host "  • ZIA: Pre-populate dashboards (run 10 min before the meeting):"
     Write-Host "    .\scripts\zia\windows\generate_zia_traffic.ps1 -Count 2"
+}
+if ($ResetDeception) {
+    Write-Host "  • Deception: Re-deploy tokens on Windows endpoints before next meeting:"
+    Write-Host "    .\scripts\deception\windows\deploy_deception_tokens.ps1"
+    Write-Host "    Confirm Deception portal: all decoys Active, alerts cleared."
 }
 Write-Host ""
