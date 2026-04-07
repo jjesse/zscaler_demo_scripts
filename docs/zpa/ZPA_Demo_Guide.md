@@ -400,3 +400,9 @@ just-in-time provisioning.
 4. Show how the four-persona policy model maps directly to their org chart.
 5. Explore ZPA for Workloads (cloud-to-cloud segmentation).
 6. Discuss replacing the customer's VPN concentrator and jump/bastion servers with ZPA + PRA.
+7. Introduce **Zscaler Deception** as the perfect complement to ZPA: ZPA limits
+   lateral movement to explicitly allowed applications; Deception catches any
+   attacker the moment they probe an unauthorised resource — fake credential
+   finds, decoy server connections, zero false positives.  Run the
+   [Deception Demo](../deception/Deception_Demo_Guide.md) to close the
+   assume-breach story alongside ZPA's prevention story.
