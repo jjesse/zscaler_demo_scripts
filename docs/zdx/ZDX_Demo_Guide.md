@@ -66,6 +66,11 @@ combining:
 
 ## Pre-Demo Checklist
 
+> **Lab configuration:** Copy `.env.example` → `.env` at the repo root and set
+> `WINDOWS_SERVER_IP`, `LINUX_SERVER_IP`, `LAB_SUBNET`, and `LAB_SUBNET_CIDR` to match
+> your environment. All scripts pick up these values automatically.
+> See [README § Customising Your Lab](../../README.md#customising-your-lab).
+
 - [ ] ZDX Admin Portal open in a browser tab (`https://zdx.zscaler.com`).
 - [ ] Windows 11 machine with Zscaler Client Connector **Connected** (ZDX data
       collection requires Client Connector v3.7+).
