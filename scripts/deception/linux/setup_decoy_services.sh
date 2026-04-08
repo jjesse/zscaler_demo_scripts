@@ -33,6 +33,14 @@
 
 set -euo pipefail
 
+# ── Load centralised lab config (.env) ────────────────────────────────────────
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC1091
+source "${_SCRIPT_DIR}/../../../scripts/lab_config.sh" 2>/dev/null \
+  || source "${_SCRIPT_DIR}/../../lab_config.sh"       2>/dev/null \
+  || true
+LINUX_SERVER_IP="${LINUX_SERVER_IP:-192.168.1.10}"
+
 # ── Colour helpers ─────────────────────────────────────────────────────────────
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
 CYAN='\033[0;36m'; MAGENTA='\033[0;35m'; WHITE='\033[1;37m'; RESET='\033[0m'
@@ -473,13 +481,13 @@ Host mgmt-jump
     ServerAliveInterval 60
 
 Host prod-db-01
-    HostName 192.168.1.10
+    HostName ${LINUX_SERVER_IP}
     Port 22
     User dbadmin
     IdentityFile ~/.ssh/id_rsa_corp
 
 Host backup-store
-    HostName 192.168.1.10
+    HostName ${LINUX_SERVER_IP}
     Port 2222
     User backup-svc
     IdentityFile ~/.ssh/id_rsa_backup
@@ -516,6 +524,7 @@ MAIL_HOST=smtp.corp.internal
 MAIL_USERNAME=mailer@corp.internal
 MAIL_PASSWORD=Smtp@Pass2024!
 ENVFILE
+    sed -i "s/192\.168\.1\.10/${LINUX_SERVER_IP}/g" "${DECOY_DIR}/app/.env"
     ok "Planted fake .env config: ${DECOY_DIR}/app/.env"
 
     # Fake database backup with credentials in header
@@ -544,6 +553,7 @@ CREATE TABLE `users` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 SQLFILE
+    sed -i "s/192\.168\.1\.10/${LINUX_SERVER_IP}/g" "${DECOY_DIR}/backup/db_backup.sql"
     ok "Planted fake DB backup: ${DECOY_DIR}/backup/db_backup.sql"
 
     # ── Summary ──────────────────────────────────────────────────────────────

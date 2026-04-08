@@ -24,9 +24,16 @@
 
 set -euo pipefail
 
+# ── Load centralised lab config (.env) ────────────────────────────────────────
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC1091
+source "${_SCRIPT_DIR}/../../../scripts/lab_config.sh" 2>/dev/null \
+  || source "${_SCRIPT_DIR}/../../lab_config.sh"       2>/dev/null \
+  || true
+
 # ── Defaults ──────────────────────────────────────────────────────────────────
-TARGET_HOST="192.168.1.20"
-LINUX_HOST="192.168.1.10"
+TARGET_HOST="${TARGET_HOST:-${WINDOWS_SERVER_IP:-192.168.1.20}}"
+LINUX_HOST="${LINUX_HOST:-${LINUX_SERVER_IP:-192.168.1.10}}"
 PERSONA="itadmin"
 SHOW_DENIED=false
 LOG_FILE="/tmp/zpa_user_access_demo.log"

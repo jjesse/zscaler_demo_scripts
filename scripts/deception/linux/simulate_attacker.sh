@@ -38,9 +38,16 @@
 
 set -euo pipefail
 
+# ── Load centralised lab config (.env) ────────────────────────────────────────
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC1091
+source "${_SCRIPT_DIR}/../../../scripts/lab_config.sh" 2>/dev/null \
+  || source "${_SCRIPT_DIR}/../../lab_config.sh"       2>/dev/null \
+  || true
+
 # ── Defaults ───────────────────────────────────────────────────────────────────
-SUBNET="192.168.1.0/24"
-TARGET_HOST="192.168.1.10"
+SUBNET="${SUBNET:-${LAB_SUBNET_CIDR:-192.168.1.0/24}}"
+TARGET_HOST="${TARGET_HOST:-${LINUX_SERVER_IP:-192.168.1.10}}"
 ATTACKER_IP=""
 LOCAL_MODE=false
 ONLY_PHASE=""

@@ -1,0 +1,2 @@
+# Personal lab configuration – never commit real IPs or credentials
+.env
