@@ -56,6 +56,7 @@ $_LabCfg  = Join-Path $_LabRoot 'scripts\Lab_Config.ps1'
 if (Test-Path $_LabCfg) { . $_LabCfg }
 $_LinuxIP   = if ($env:LINUX_SERVER_IP)   { $env:LINUX_SERVER_IP }   else { '192.168.1.10' }
 $_WindowsIP = if ($env:WINDOWS_SERVER_IP) { $env:WINDOWS_SERVER_IP } else { '192.168.1.20' }
+$_Subnet    = if ($env:LAB_SUBNET)        { $env:LAB_SUBNET }        else { '192.168.1' }
 
 # ---------------------------------------------------------------------------
 # Output helpers
@@ -265,7 +266,7 @@ SET time_zone = "+00:00";
 CREATE DATABASE IF NOT EXISTS `corpdb_prod` DEFAULT CHARACTER SET utf8mb4;
 USE `corpdb_prod`;
 '@
-    (Get-Content $Tokens.DbBackup -Raw) -replace '192\.168\.1\.10', $_LinuxIP |
+    (Get-Content $Tokens.DbBackup -Raw) -replace '192\.168\.1\.10', $_LinuxIP -replace '192\.168\.1\.%', "$_Subnet.%" |
         Set-Content $Tokens.DbBackup -Encoding UTF8 -NoNewline
     Write-Planted "DB backup  →  $($Tokens.DbBackup)"
 

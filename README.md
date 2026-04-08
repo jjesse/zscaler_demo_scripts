@@ -71,6 +71,71 @@ machine (any Linux or Windows host on the same subnet).
 | Reset lab between demos (Linux) | `scripts/reset_lab.sh` |
 | Reset lab between demos (Windows) | `scripts/reset_lab.ps1` |
 
+### Lab Configuration
+
+| Area | Files |
+|------|-------|
+| Example environment config (copy to `.env`) | `.env.example` |
+| Bash config loader (sourced by Linux scripts) | `scripts/lab_config.sh` |
+| PowerShell config loader (dot-sourced by Windows scripts) | `scripts/Lab_Config.ps1` |
+
+---
+
+## Customising Your Lab
+
+The default scripts use the IP addresses from the reference lab
+(`192.168.1.20` for Windows Server, `192.168.1.10` for Ubuntu).
+If your lab uses different addresses you can override them **without editing
+any script** — and without pushing private details to GitHub.
+
+### 1. Copy the example config
+
+```bash
+cp .env.example .env
+```
+
+### 2. Edit `.env` with your lab values
+
+```ini
+# .env  (git-ignored — your changes stay local)
+WINDOWS_SERVER_IP=10.0.0.50
+LINUX_SERVER_IP=10.0.0.51
+LAB_SUBNET=10.0.0
+LAB_SUBNET_CIDR=10.0.0.0/24
+```
+
+### 3. Run scripts normally
+
+Every script automatically loads `.env` on start-up. You can still use
+CLI flags and environment-variable overrides; they take the highest priority:
+
+```bash
+# Uses .env value for TARGET_HOST
+sudo bash scripts/zpa/linux/generate_zpa_traffic.sh
+
+# One-off override (highest priority)
+TARGET_HOST=172.16.1.5 sudo bash scripts/zpa/linux/generate_zpa_traffic.sh
+```
+
+```powershell
+# Uses .env value
+.\scripts\zpa\windows\generate_zpa_traffic.ps1
+
+# One-off override (highest priority)
+.\scripts\zpa\windows\generate_zpa_traffic.ps1 -TargetHost 172.16.1.5
+```
+
+### Priority order
+
+| Priority | Source | Example |
+|----------|--------|---------|
+| 1 (highest) | CLI flag / env var | `-TargetHost 10.0.0.1` or `TARGET_HOST=10.0.0.1` |
+| 2 | `.env` file | `WINDOWS_SERVER_IP=10.0.0.50` |
+| 3 (lowest) | Script default | `192.168.1.20` |
+
+> **Tip:** Because `.env` is listed in `.gitignore`, you can `git pull`
+> upstream changes at any time without overwriting your personal settings.
+
 ---
 
 ## Quick Start

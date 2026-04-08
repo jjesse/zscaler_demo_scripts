@@ -554,6 +554,7 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 SQLFILE
     sed -i "s/192\.168\.1\.10/${LINUX_SERVER_IP}/g" "${DECOY_DIR}/backup/db_backup.sql"
+    sed -i "s/192\.168\.1\.%/${LAB_SUBNET}.%/g"     "${DECOY_DIR}/backup/db_backup.sql"
     ok "Planted fake DB backup: ${DECOY_DIR}/backup/db_backup.sql"
 
     # ── Summary ──────────────────────────────────────────────────────────────
