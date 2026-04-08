@@ -80,6 +80,10 @@ Zscaler Deception flips the detection model:
 
 ## Lab Topology (Deception Extension)
 
+> **Non-default IPs?** Set `LINUX_SERVER_IP`, `WINDOWS_SERVER_IP`, and `LAB_SUBNET_CIDR` in
+> `.env` (copy `.env.example` → `.env`). Scripts pick up the values automatically.
+> See [README § Customising Your Lab](../../README.md#customising-your-lab).
+
 ```
 Internet / ZIA Cloud / ZPA Cloud
          │

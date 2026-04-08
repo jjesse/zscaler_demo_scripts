@@ -64,6 +64,10 @@ moments that land hardest with executives:
 
 ## Pre-Demo Checklist
 
+> **Non-default IPs or hostnames?** Set `WINDOWS_SERVER_IP` / `LINUX_SERVER_IP` in `.env`
+> (copy `.env.example` → `.env`) — scripts pick up the values automatically.
+> See [README § Customising Your Lab](../../README.md#customising-your-lab).
+
 - [ ] ZPA Admin Portal open in a browser tab (split screen or second monitor).
 - [ ] Windows 11 machine logged in as **bob.jones** (IT Admin); ZPA Client **Connected** (green tray icon).
 - [ ] A second Windows session (or browser profile) ready for **carol.white** (Contractor) persona.

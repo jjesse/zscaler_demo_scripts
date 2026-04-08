@@ -40,6 +40,11 @@ must have IP connectivity to the Windows Server).
 | Windows client IP | 192.168.1.30 (DHCP is fine) |
 | Outbound HTTPS (443) | Required from all machines to `*.zscaler.net`, `*.zscalerone.net`, `*.zscalertwo.net`, etc. |
 
+> **Different IPs or hostnames?** Copy `.env.example` → `.env` at the repo root and set
+> `WINDOWS_SERVER_IP`, `LINUX_SERVER_IP`, `LAB_SUBNET`, and `LAB_SUBNET_CIDR`. All scripts
+> pick up the values automatically — no file edits required. See
+> [README § Customising Your Lab](../../README.md#customising-your-lab).
+
 ---
 
 ## 2. ZPA Tenant Configuration
