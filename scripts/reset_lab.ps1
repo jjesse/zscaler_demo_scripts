@@ -52,6 +52,11 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Continue"
 
+# ── Load centralised lab config (.env) ────────────────────────────────────────
+$_LabCfg = Join-Path $PSScriptRoot 'Lab_Config.ps1'
+if (Test-Path $_LabCfg) { . $_LabCfg }
+$_LinuxIP = if ($env:LINUX_SERVER_IP) { $env:LINUX_SERVER_IP } else { '192.168.1.10' }
+
 # ── Colour helpers ────────────────────────────────────────────────────────────
 function Write-Ok      { param([string]$msg) Write-Host "  [OK]   $msg" -ForegroundColor Green }
 function Write-Warn    { param([string]$msg) Write-Host "  [WARN] $msg" -ForegroundColor Yellow }
@@ -207,7 +212,7 @@ if ($ResetDeception) {
     }
 
     # Remove the fake SMB credential from Credential Manager
-    $null = cmdkey /delete:'\\192.168.1.10\CorpShare' 2>$null
+    $null = cmdkey /delete:"\\$_LinuxIP\CorpShare" 2>$null
     Write-Ok "Removed fake SMB entry from Windows Credential Manager"
 
     # Remove attacker simulation log

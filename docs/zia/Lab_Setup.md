@@ -22,6 +22,11 @@ the demo scripts or walk a customer through the ZIA Demo Guide.
 | Windows 11 | End-user client (ZIA Client Connector installed) | 2 vCPU, 4 GB RAM |
 | Ubuntu 22.04 | Traffic generator / Linux client | 2 vCPU, 2 GB RAM |
 
+> **Lab configuration:** Copy `.env.example` → `.env` at the repo root and set
+> `WINDOWS_SERVER_IP`, `LINUX_SERVER_IP`, `LAB_SUBNET`, and `LAB_SUBNET_CIDR` to match
+> your environment. All scripts pick up these values automatically — no file edits required.
+> See [README § Customising Your Lab](../../README.md#customising-your-lab).
+
 ### 1.3 Traffic Forwarding
 
 Traffic must be forwarded to ZIA. Choose **one** of the following methods:

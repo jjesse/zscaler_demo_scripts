@@ -62,6 +62,11 @@ If you have limited time, run this cut-down version:
 
 ## Pre-Demo Checklist
 
+> **Lab configuration:** Copy `.env.example` → `.env` at the repo root and set
+> `WINDOWS_SERVER_IP`, `LINUX_SERVER_IP`, `LAB_SUBNET`, and `LAB_SUBNET_CIDR` to match
+> your environment. All scripts pick up these values automatically.
+> See [README § Customising Your Lab](../../README.md#customising-your-lab).
+
 - [ ] ZIA Admin Portal open in a browser tab.
 - [ ] Windows 11 machine with ZIA Client Connector **Connected** (green tray icon).
 - [ ] `https://ip.zscaler.com` confirms traffic is through ZIA.

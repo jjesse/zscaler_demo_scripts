@@ -37,6 +37,14 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Continue"
 
+# ── Load centralised lab config (.env) ────────────────────────────────────────
+$_LabRoot = Split-Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) -Parent
+$_LabCfg  = Join-Path $_LabRoot 'scripts\Lab_Config.ps1'
+if (Test-Path $_LabCfg) { . $_LabCfg }
+if (-not $PSBoundParameters.ContainsKey('TargetHost') -and $env:WINDOWS_SERVER_IP) {
+    $TargetHost = $env:WINDOWS_SERVER_IP
+}
+
 # ── Colour helpers ────────────────────────────────────────────────────────────
 function Write-OK      { param([string]$msg) Write-Host "  [OK]    $msg" -ForegroundColor Green }
 function Write-Fail    { param([string]$msg) Write-Host "  [FAIL]  $msg" -ForegroundColor Red }
